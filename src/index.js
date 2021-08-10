@@ -12,6 +12,7 @@ const socket = socketIOClient(ENDPOINT, {
   extraHeaders: {
     "my-custom-header": "abcd",
   },
+  secure: true,
 });
 
 ReactDOM.render(
