@@ -6,8 +6,13 @@ import "./login.css";
 import App from "./App";
 import socketIOClient from "socket.io-client";
 
-const ENDPOINT = "https://tomper-chat-server.herokuapp.com";
-const socket = socketIOClient(ENDPOINT);
+const ENDPOINT = "http://localhost:5000";
+const socket = socketIOClient(ENDPOINT, {
+  withCredentials: true,
+  extraHeaders: {
+    "my-custom-header": "abcd",
+  },
+});
 
 ReactDOM.render(
   <React.StrictMode>
