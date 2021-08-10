@@ -7,13 +7,7 @@ import App from "./App";
 import socketIOClient from "socket.io-client";
 
 const ENDPOINT = "https://tomper-chat-server.herokuapp.com";
-const socket = socketIOClient(ENDPOINT, {
-  withCredentials: true,
-  extraHeaders: {
-    "my-custom-header": "abcd",
-  },
-  transports: ["websocket", "polling", "flashsocket"],
-});
+const socket = socketIOClient(ENDPOINT);
 
 ReactDOM.render(
   <React.StrictMode>
