@@ -6,7 +6,7 @@ import "./login.css";
 import App from "./App";
 import socketIOClient from "socket.io-client";
 
-const ENDPOINT = "https://tomper-chat-server.herokuapp.com/";
+const ENDPOINT = "https://tomper-chat-server.herokuapp.com";
 const socket = socketIOClient(ENDPOINT);
 
 ReactDOM.render(
