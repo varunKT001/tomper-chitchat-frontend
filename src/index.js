@@ -12,7 +12,7 @@ const socket = socketIOClient(ENDPOINT, {
   extraHeaders: {
     "my-custom-header": "abcd",
   },
-  secure: true,
+  transports: ["websocket", "polling", "flashsocket"],
 });
 
 ReactDOM.render(
