@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { GoPrimitiveDot } from "react-icons/go";
-import { BsChatDotsFill, BsFillHouseFill } from "react-icons/bs";
+import {
+  BsChatDotsFill,
+  BsFillHouseFill,
+  BsMoon,
+  BsSun,
+  BsArrowRightShort,
+  BsFillPersonFill,
+} from "react-icons/bs";
 import { IoPeopleSharp } from "react-icons/io5";
+import { FaTelegramPlane } from "react-icons/fa";
 
 function App({ socket }) {
   const [loggedin, setLoggedIn] = useState(false);
@@ -13,6 +21,7 @@ function App({ socket }) {
   const [messageText, setMessageText] = useState("");
   const [typing, setTyping] = useState(false);
   const [typingText, setTypingText] = useState("");
+  const [background, setBackground] = useState(true);
   const permanentRooms = [
     "General",
     "webDevelopment",
@@ -33,6 +42,7 @@ function App({ socket }) {
     });
     socket.on("typing", (typingText) => {
       setTyping(true);
+      window.scrollTo(0, document.body.scrollHeight);
       setTypingText(typingText);
       if (timeout !== undefined) {
         clearTimeout(timeout);
@@ -42,6 +52,10 @@ function App({ socket }) {
       }, 3000);
     });
   }, []);
+
+  useEffect(() => {
+    document.body.className = background ? "dark" : "light";
+  }, [background]);
 
   function newUserLogin(e) {
     setError(false);
@@ -79,6 +93,10 @@ function App({ socket }) {
 
   function sendTypingEvent() {
     socket.emit("typing");
+  }
+
+  function changeBackground() {
+    setBackground(!background);
   }
 
   if (!loggedin) {
@@ -145,15 +163,41 @@ function App({ socket }) {
         <div id="menuToggle">
           <input type="checkbox" />
 
-          <span></span>
-          <span></span>
-          <span></span>
+          <span
+            style={{ background: `${!background ? "#232323" : "#2a93ec"}` }}
+          ></span>
+          <span
+            style={{ background: `${!background ? "#232323" : "#2a93ec"}` }}
+          ></span>
+          <span
+            style={{ background: `${!background ? "#232323" : "#2a93ec"}` }}
+          ></span>
 
           <ul id="menu">
             <li>
+              Theme:{" "}
+              <div class="container">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    defaultChecked={background}
+                    onChange={changeBackground}
+                  />{" "}
+                  <div></div>
+                </label>
+              </div>
+            </li>
+            <li>
               Room{" "}
               <BsFillHouseFill style={{ transform: "translate(3px, 3px)" }} />
-              <p>{room}</p>
+            </li>
+            <li className="room-name" style={{ fontWeight: "normal" }}>
+              <p style={{ margin: "0", padding: "0.5rem 1rem" }}>
+                {room} : {users.length}{" "}
+                <BsFillPersonFill
+                  style={{ transform: "translate(0px, 3px)" }}
+                />
+              </p>
             </li>
             <li>
               Online users{" "}
@@ -161,7 +205,11 @@ function App({ socket }) {
             </li>
             {users.map((user, index) => {
               return (
-                <li className="user-names" key={index}>
+                <li
+                  className="user-names"
+                  key={index}
+                  style={{ fontWeight: "normal" }}
+                >
                   <p>{user.name}</p>
                   <GoPrimitiveDot className="online-icon" />
                 </li>
@@ -192,6 +240,7 @@ function App({ socket }) {
                       {message.username !== username && message.username}
                     </h4>
                     <p className="chat-message">{message.text}</p>
+                    <p className="chat-time">{message.time}</p>
                   </div>
                 </li>
               );
@@ -200,7 +249,12 @@ function App({ socket }) {
               <li>
                 <div className="message">
                   <h4 className="person-name"></h4>
-                  <p className="chat-message">{typingText}</p>
+                  <p
+                    className="chat-message"
+                    style={{ color: "rgb(0,150,136)", fontWeight: "bold" }}
+                  >
+                    {typingText}
+                  </p>
                 </div>
               </li>
             )}
@@ -214,14 +268,17 @@ function App({ socket }) {
               autoFocus
               value={messageText}
               autoComplete="off"
-              onKeyPress={() => {
-                sendTypingEvent();
-              }}
+              // onKeyPress={() => {
+              //   sendTypingEvent();
+              // }}
               onChange={(e) => {
                 setMessageText(e.target.value);
+                sendTypingEvent();
               }}
             />
-            <button type="submit">send</button>
+            <button type="submit">
+              <FaTelegramPlane style={{ fontSize: "1.5rem" }} />
+            </button>
           </form>
         </div>
       </section>

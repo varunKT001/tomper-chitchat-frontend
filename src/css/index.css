@@ -3,14 +3,29 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
-  background: #232323;
+  background: url("../images/whatsapp_dark_background.jpeg");
   color: white;
+  transition: all 0.25s ease-in;
 }
 
 html,
 body {
   max-width: 100%;
   overflow-x: hidden;
+}
+
+.dark {
+  background: url("../images/whatsapp_dark_background.jpeg");
+}
+.light {
+  background: url("../images/whatsapp_light_background.png");
+  color: black;
+}
+.dark_ham {
+  background: #232323;
+}
+.light_ham {
+  background: #cdcdcd;
 }
 
 .users-section {
@@ -49,7 +64,7 @@ body {
   right: 0;
   bottom: 0;
   display: flex;
-  height: 3rem;
+  height: 4rem;
   box-sizing: border-box;
   backdrop-filter: blur(10px);
 }
@@ -64,9 +79,10 @@ body {
   outline: none;
 }
 #form > button {
-  background: #333;
+  /* background: #333; */
+  background: #2a93ec;
   border: none;
-  padding: 0 1rem;
+  padding: 0 2rem;
   margin: 0.25rem;
   border-radius: 3px;
   outline: none;
@@ -99,7 +115,9 @@ ul {
   padding: 1rem;
   border-radius: 0.75rem;
   border-bottom-left-radius: 0;
-  background: rgba(255, 165, 0, 0.5);
+  /* background: rgba(255, 165, 0, 0.5); */
+  background: #dbe6ff;
+  color: black;
 }
 
 .user-msg {
@@ -110,6 +128,7 @@ ul {
 .user-msg-border {
   border-radius: 0.75rem;
   border-bottom-right-radius: 0;
+  background: #4fcb8d;
 }
 
 .text-to-end {
@@ -118,10 +137,21 @@ ul {
 
 .person-name {
   margin: 0;
-  color: orange;
+  /* color: #ff6174; */
+  color: #2a93ec;
   font-weight: bold;
 }
 
 .chat-message {
+  padding: 0;
   margin: 0;
+  margin-top: 0.25rem;
+}
+
+.chat-time {
+  padding: 0;
+  margin: 0.25rem 0rem;
+  font-weight: 100;
+  font-size: 0.75rem;
+  transform: translate(0px, 5px);
 }

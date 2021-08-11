@@ -137,3 +137,12 @@
 #menuToggle input:checked ~ ul {
   transform: none;
 }
+
+.room-name {
+  margin: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 255, 0.3);
+  border-radius: 0.5rem;
+}
