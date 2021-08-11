@@ -11,20 +11,35 @@ function App({ socket }) {
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
+  const [typing, setTyping] = useState(false);
+  const [typingText, setTypingText] = useState("");
   const permanentRooms = [
     "General",
     "webDevelopment",
     "competetiveCoding",
     "Gaming",
   ];
+  let timeout;
+
   useEffect(() => {
     setLoggedIn(false);
 
     socket.on("chat-message", (message) => {
+      setTyping(false);
       appendMessages(message);
     });
     socket.on("connected-users", (users) => {
       appendUsers(users);
+    });
+    socket.on("typing", (typingText) => {
+      setTyping(true);
+      setTypingText(typingText);
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => {
+        setTyping(false);
+      }, 3000);
     });
   }, []);
 
@@ -60,6 +75,10 @@ function App({ socket }) {
     e.preventDefault();
     socket.emit("chat-message", messageText);
     setMessageText("");
+  }
+
+  function sendTypingEvent() {
+    socket.emit("typing");
   }
 
   if (!loggedin) {
@@ -177,6 +196,14 @@ function App({ socket }) {
                 </li>
               );
             })}
+            {typing && (
+              <li>
+                <div className="message">
+                  <h4 className="person-name"></h4>
+                  <p className="chat-message">{typingText}</p>
+                </div>
+              </li>
+            )}
           </ul>
         </div>
         <div>
@@ -187,6 +214,9 @@ function App({ socket }) {
               autoFocus
               value={messageText}
               autoComplete="off"
+              onKeyPress={() => {
+                sendTypingEvent();
+              }}
               onChange={(e) => {
                 setMessageText(e.target.value);
               }}
