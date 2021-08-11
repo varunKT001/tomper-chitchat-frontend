@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
-import "./hamburger.css";
-import "./login.css";
+import "./css/index.css";
+import "./css/hamburger.css";
+import "./css/login.css";
 import App from "./App";
 import socketIOClient from "socket.io-client";
 

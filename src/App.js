@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { GoPrimitiveDot } from "react-icons/go";
-import { BsChatDotsFill } from "react-icons/bs";
+import { BsChatDotsFill, BsFillHouseFill } from "react-icons/bs";
 import { IoPeopleSharp } from "react-icons/io5";
 
 function App({ socket }) {
   const [loggedin, setLoggedIn] = useState(false);
   const [error, setError] = useState(false);
   const [username, setUsername] = useState("");
+  const [room, setRoom] = useState("");
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
+  const permanentRooms = [
+    "General",
+    "webDevelopment",
+    "competetiveCoding",
+    "Gaming",
+  ];
   useEffect(() => {
     setLoggedIn(false);
 
@@ -24,8 +31,12 @@ function App({ socket }) {
   function newUserLogin(e) {
     setError(false);
     e.preventDefault();
-    if (username) {
-      socket.emit("new-user", username);
+    if (username && room) {
+      const info = {
+        username,
+        room,
+      };
+      socket.emit("new-user", info);
       setLoggedIn(true);
     } else {
       setError(true);
@@ -41,7 +52,6 @@ function App({ socket }) {
   }
 
   function appendUsers(users) {
-    console.log(users);
     setUsers(users);
     window.scrollTo(0, document.body.scrollHeight);
   }
@@ -58,17 +68,49 @@ function App({ socket }) {
         <div id="login-form-container">
           <form id="login-form" onSubmit={newUserLogin}>
             <h3>
-              VARTA <BsChatDotsFill />
+              TOMPER CHAT <BsChatDotsFill />
             </h3>
             <input
               id="login-input"
               className={`${error && "error"}`}
               type="text"
+              name="username"
               value={username}
               placeholder="username"
               autoComplete="off"
               onChange={(e) => {
                 setUsername(e.target.value);
+              }}
+            />
+            {permanentRooms.map((room) => {
+              return (
+                <div className="rooms">
+                  <span>{room}</span>
+                  <button
+                    type="button"
+                    onMouseOver={() => {
+                      setRoom(room);
+                    }}
+                    onClick={(e) => {
+                      newUserLogin(e);
+                    }}
+                  >
+                    join
+                  </button>
+                </div>
+              );
+            })}
+            <h3>---OR---</h3>
+            <input
+              id="login-input"
+              className={`${error && "error"}`}
+              type="text"
+              name="room"
+              value={room}
+              placeholder="room id"
+              autoComplete="off"
+              onChange={(e) => {
+                setRoom(e.target.value);
               }}
             />
             <button type="submit">join</button>
@@ -89,6 +131,11 @@ function App({ socket }) {
           <span></span>
 
           <ul id="menu">
+            <li>
+              Room{" "}
+              <BsFillHouseFill style={{ transform: "translate(3px, 3px)" }} />
+              <p>{room}</p>
+            </li>
             <li>
               Online users{" "}
               <IoPeopleSharp style={{ transform: "translate(3px, 3px)" }} />
