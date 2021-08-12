@@ -12,7 +12,6 @@
   border: none;
   border-radius: 50%;
   outline: none;
-  transform: translate(0px, 5px);
   transition: all 0.125s ease-in;
 }
 .image-modal > button:hover {
