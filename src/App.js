@@ -63,6 +63,10 @@ function App({ socket }) {
     document.body.className = background ? "dark" : "light";
   }, [background]);
 
+  useEffect(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+
   function newUserLogin(e) {
     setError(false);
     e.preventDefault();
@@ -98,7 +102,6 @@ function App({ socket }) {
   function sendMessage(e) {
     e.preventDefault();
     setLoading(true);
-    window.scrollTo(0, document.body.scrollHeight);
     socket.emit("chat-message", { messageText, baseImage });
     setMessageText("");
     setBaseImage("");
