@@ -15,10 +15,10 @@ body {
 }
 
 .dark {
-  background: url("../images/whatsapp_dark_background.jpeg");
+  background: url("../images/whatsapp_dark_background.jpeg") fixed;
 }
 .light {
-  background: url("../images/whatsapp_light_background.png");
+  background: url("../images/whatsapp_light_background.png") fixed;
   color: black;
 }
 .dark_ham {
@@ -82,7 +82,7 @@ body {
   /* background: #333; */
   background: #2a93ec;
   border: none;
-  padding: 0 2rem;
+  padding: 0 1rem;
   margin: 0.25rem;
   border-radius: 3px;
   outline: none;
@@ -148,10 +148,33 @@ ul {
   margin-top: 0.25rem;
 }
 
+.chat-message-image {
+  box-sizing: border-box;
+  display: inline;
+}
+
 .chat-time {
   padding: 0;
   margin: 0.25rem 0rem;
   font-weight: 100;
   font-size: 0.75rem;
   transform: translate(0px, 5px);
+}
+
+#file-upload {
+  display: none;
+}
+
+#upload-button {
+  display: flex;
+  background: #2a93ec;
+  border: none;
+  padding: 0 1rem;
+  margin: 0.25rem;
+  border-radius: 3px;
+  outline: none;
+  color: #fff;
+  font-size: 1.5rem;
+  justify-content: center;
+  align-items: center;
 }

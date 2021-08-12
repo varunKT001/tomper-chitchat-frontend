@@ -3,13 +3,13 @@ import { GoPrimitiveDot } from "react-icons/go";
 import {
   BsChatDotsFill,
   BsFillHouseFill,
-  BsMoon,
-  BsSun,
-  BsArrowRightShort,
   BsFillPersonFill,
 } from "react-icons/bs";
 import { IoPeopleSharp } from "react-icons/io5";
 import { FaTelegramPlane } from "react-icons/fa";
+import { AiOutlineClose } from "react-icons/ai";
+import { BiImageAdd } from "react-icons/bi";
+import { GrStatusGood } from "react-icons/gr";
 
 function App({ socket }) {
   const [loggedin, setLoggedIn] = useState(false);
@@ -22,6 +22,10 @@ function App({ socket }) {
   const [typing, setTyping] = useState(false);
   const [typingText, setTypingText] = useState("");
   const [background, setBackground] = useState(true);
+  const [baseImage, setBaseImage] = useState("");
+  const [openImage, setOpenImage] = useState(false);
+  const [image, setImage] = useState("");
+
   const permanentRooms = [
     "General",
     "webDevelopment",
@@ -31,8 +35,6 @@ function App({ socket }) {
   let timeout;
 
   useEffect(() => {
-    setLoggedIn(false);
-
     socket.on("chat-message", (message) => {
       setTyping(false);
       appendMessages(message);
@@ -72,6 +74,10 @@ function App({ socket }) {
     }
   }
 
+  function userLogout() {
+    window.location.reload();
+  }
+
   function appendMessages(message) {
     setMessages((oldMsg) => {
       let newMsg = [...oldMsg, message];
@@ -87,8 +93,9 @@ function App({ socket }) {
 
   function sendMessage(e) {
     e.preventDefault();
-    socket.emit("chat-message", messageText);
+    socket.emit("chat-message", { messageText, baseImage });
     setMessageText("");
+    setBaseImage("");
   }
 
   function sendTypingEvent() {
@@ -97,6 +104,101 @@ function App({ socket }) {
 
   function changeBackground() {
     setBackground(!background);
+  }
+
+  const uploadImage = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const base64 = await convertBase64(file);
+      const resized_base64 = await process_image(base64);
+      setBaseImage(resized_base64);
+    }
+  };
+
+  const convertBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+
+  async function reduce_image_file_size(
+    base64Str,
+    MAX_WIDTH = 450,
+    MAX_HEIGHT = 450
+  ) {
+    let resized_base64 = await new Promise((resolve) => {
+      let img = new Image();
+      img.src = base64Str;
+      img.onload = () => {
+        let canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL()); // this will return base64 image results after resize
+      };
+    });
+    return resized_base64;
+  }
+
+  async function process_image(res, min_image_size = 500) {
+    if (res) {
+      const old_size = calc_image_size(res);
+      if (old_size > min_image_size) {
+        const resized = await reduce_image_file_size(res);
+        const new_size = calc_image_size(resized);
+        console.log("new_size=> ", new_size, "KB");
+        console.log("old_size=> ", old_size, "KB");
+        return resized;
+      } else {
+        console.log("image already small enough");
+        return res;
+      }
+    } else {
+      console.log("return err");
+      return null;
+    }
+  }
+
+  function calc_image_size(image) {
+    let y = 1;
+    if (image.endsWith("==")) {
+      y = 2;
+    }
+    const x_size = image.length * (3 / 4) - y;
+    return Math.round(x_size / 1024);
+  }
+
+  function showImage(base64string) {
+    setOpenImage(true);
+    setImage(base64string);
+  }
+  function closeImage() {
+    setOpenImage(false);
+    setImage("");
   }
 
   if (!loggedin) {
@@ -119,9 +221,9 @@ function App({ socket }) {
                 setUsername(e.target.value);
               }}
             />
-            {permanentRooms.map((room) => {
+            {permanentRooms.map((room, index) => {
               return (
-                <div className="rooms">
+                <div className="rooms" key={index}>
                   <span>{room}</span>
                   <button
                     type="button"
@@ -154,6 +256,17 @@ function App({ socket }) {
           </form>
         </div>
       </div>
+    );
+  }
+
+  if (openImage) {
+    return (
+      <main className="image-modal">
+        <button onClick={closeImage}>
+          <AiOutlineClose style={{ transform: "translate(0px, 5px)" }} />
+        </button>
+        <img src={image} alt="user-media" width="100%" />
+      </main>
     );
   }
 
@@ -199,6 +312,14 @@ function App({ socket }) {
                 />
               </p>
             </li>
+            <li className="leave-button" style={{ fontWeight: "normal" }}>
+              <p
+                style={{ margin: "0", padding: "0.5rem 1rem" }}
+                onClick={userLogout}
+              >
+                Leave room
+              </p>
+            </li>
             <li>
               Online users{" "}
               <IoPeopleSharp style={{ transform: "translate(3px, 3px)" }} />
@@ -240,6 +361,21 @@ function App({ socket }) {
                       {message.username !== username && message.username}
                     </h4>
                     <p className="chat-message">{message.text}</p>
+                    {message.image && (
+                      <div
+                        style={{
+                          width: "10rem",
+                          height: "10rem",
+                          background: `url(${message.image}) no-repeat`,
+                          backgroundSize: "cover",
+                        }}
+                        onClick={() => {
+                          showImage(message.image);
+                        }}
+                      >
+                        {/* <img src={message.image} /> */}
+                      </div>
+                    )}
                     <p className="chat-time">{message.time}</p>
                   </div>
                 </li>
@@ -248,7 +384,6 @@ function App({ socket }) {
             {typing && (
               <li>
                 <div className="message">
-                  <h4 className="person-name"></h4>
                   <p
                     className="chat-message"
                     style={{ color: "rgb(0,150,136)", fontWeight: "bold" }}
@@ -262,6 +397,21 @@ function App({ socket }) {
         </div>
         <div>
           <form id="form" onSubmit={sendMessage}>
+            <label
+              htmlFor="file-upload"
+              id="upload-button"
+              style={{ background: `${baseImage && "#93D976"}` }}
+            >
+              {baseImage ? <GrStatusGood /> : <BiImageAdd />}
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                uploadImage(e);
+              }}
+            />
             <input
               id="input"
               type="text"

@@ -146,3 +146,19 @@
   background: rgba(0, 0, 255, 0.3);
   border-radius: 0.5rem;
 }
+
+.leave-button {
+  margin: 0.25rem;
+  display: flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  background: #ff7f7f;
+  border: none;
+  padding: 0 2rem;
+  outline: none;
+  color: #fff;
+  transition: all 0.125s ease-in;
+}
+.leave-button:hover {
+  background: #ff0000;
+}
