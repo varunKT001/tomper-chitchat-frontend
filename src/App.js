@@ -10,6 +10,8 @@ import { FaTelegramPlane } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
 import { BiImageAdd } from "react-icons/bi";
 import { GrStatusGood } from "react-icons/gr";
+import Spinner from "./svg/spinner.svg";
+console.log(Spinner);
 
 function App({ socket }) {
   const [loggedin, setLoggedIn] = useState(false);
@@ -25,6 +27,7 @@ function App({ socket }) {
   const [baseImage, setBaseImage] = useState("");
   const [openImage, setOpenImage] = useState(false);
   const [image, setImage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const permanentRooms = [
     "General",
@@ -37,6 +40,7 @@ function App({ socket }) {
   useEffect(() => {
     socket.on("chat-message", (message) => {
       setTyping(false);
+      setLoading(false);
       appendMessages(message);
     });
     socket.on("connected-users", (users) => {
@@ -93,6 +97,7 @@ function App({ socket }) {
 
   function sendMessage(e) {
     e.preventDefault();
+    setLoading(true);
     socket.emit("chat-message", { messageText, baseImage });
     setMessageText("");
     setBaseImage("");
@@ -199,6 +204,7 @@ function App({ socket }) {
   function closeImage() {
     setOpenImage(false);
     setImage("");
+    window.scrollTo(0, document.body.scrollHeight);
   }
 
   if (!loggedin) {
@@ -331,7 +337,10 @@ function App({ socket }) {
                   key={index}
                   style={{ fontWeight: "normal" }}
                 >
-                  <p>{user.name}</p>
+                  <p>
+                    {user.name}
+                    {user.name === username && " (you)"}
+                  </p>
                   <GoPrimitiveDot className="online-icon" />
                 </li>
               );
@@ -389,6 +398,19 @@ function App({ socket }) {
                     style={{ color: "rgb(0,150,136)", fontWeight: "bold" }}
                   >
                     {typingText}
+                  </p>
+                </div>
+              </li>
+            )}
+            {loading && (
+              <li className="user-msg">
+                <div className="message user-msg-border">
+                  <p className="chat-message">
+                    <img
+                      src={Spinner}
+                      alt="spinner"
+                      style={{ width: "5rem" }}
+                    />
                   </p>
                 </div>
               </li>
