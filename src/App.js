@@ -98,6 +98,7 @@ function App({ socket }) {
   function sendMessage(e) {
     e.preventDefault();
     setLoading(true);
+    window.scrollTo(0, document.body.scrollHeight);
     socket.emit("chat-message", { messageText, baseImage });
     setMessageText("");
     setBaseImage("");
