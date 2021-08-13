@@ -40,7 +40,7 @@ function App({ socket }) {
   useEffect(() => {
     socket.on("chat-message", (message) => {
       setTyping(false);
-      setLoading(false);
+      turnLoaderOFF(message);
       appendMessages(message);
     });
     socket.on("connected-users", (users) => {
@@ -209,6 +209,15 @@ function App({ socket }) {
     setOpenImage(false);
     setImage("");
     window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  function turnLoaderOFF(message) {
+    setUsername((oldUsername) => {
+      if (message.username === oldUsername) {
+        setLoading(false);
+      }
+      return oldUsername;
+    });
   }
 
   if (!loggedin) {
