@@ -9,7 +9,6 @@ import App from "./App";
 import socketIOClient from "socket.io-client";
 
 const ENDPOINT = "https://tomper-chat-server.herokuapp.com";
-// const ENDPOINT = "http://localhost:5000";
 const socket = socketIOClient(ENDPOINT);
 
 ReactDOM.render(

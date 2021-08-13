@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { GoPrimitiveDot } from "react-icons/go";
-import {
-  BsChatDotsFill,
-  BsFillHouseFill,
-  BsFillPersonFill,
-} from "react-icons/bs";
-import { IoPeopleSharp } from "react-icons/io5";
+
+/* --- IMPORTING ICONS --- */
+import { BsChatDotsFill } from "react-icons/bs";
 import { FaTelegramPlane } from "react-icons/fa";
-import { AiOutlineClose } from "react-icons/ai";
 import { BiImageAdd } from "react-icons/bi";
 import { GrStatusGood } from "react-icons/gr";
-import Spinner from "./svg/spinner.svg";
-console.log(Spinner);
+
+/* --- IMPORTING COMPONENTS --- */
+import LoginRoom from "./components/login_room";
+import ImageView from "./components/image_view";
+import Hamburger from "./components/hamburger";
+import UsersMessage from "./components/users_messages";
+import TypingMessage from "./components/typing_message";
+import LoadingSpinner from "./components/loading_spinner";
+
+/* --- IMPORTING UTILITY FUNCTIONS --- */
+import compressImage from "./funtions/image_compression";
 
 function App({ socket }) {
+  /* --- STATES --- */
   const [loggedin, setLoggedIn] = useState(false);
   const [error, setError] = useState(false);
   const [username, setUsername] = useState("");
@@ -29,6 +34,7 @@ function App({ socket }) {
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /* --- LOCAL VARIABLES --- */
   const permanentRooms = [
     "General",
     "webDevelopment",
@@ -37,10 +43,16 @@ function App({ socket }) {
   ];
   let timeout;
 
+  /* --- SETTING UP SOCKET EVENT LISTNERS --- */
   useEffect(() => {
     socket.on("chat-message", (message) => {
       setTyping(false);
-      turnLoaderOFF(message);
+      setUsername((oldUsername) => {
+        if (message.username === oldUsername) {
+          setLoading(false);
+        }
+        return oldUsername;
+      });
       appendMessages(message);
     });
     socket.on("connected-users", (users) => {
@@ -59,14 +71,17 @@ function App({ socket }) {
     });
   }, []);
 
+  /* --- BACKGROUND SETUP --- */
   useEffect(() => {
     document.body.className = background ? "dark" : "light";
   }, [background]);
 
+  /* --- AUTO SCROLL --- */
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });
 
+  /* --- USER LOGIN --- */
   function newUserLogin(e) {
     setError(false);
     e.preventDefault();
@@ -86,6 +101,7 @@ function App({ socket }) {
     window.location.reload();
   }
 
+  /* --- MESSAGES FUNCTIONS --- */
   function appendMessages(message) {
     setMessages((oldMsg) => {
       let newMsg = [...oldMsg, message];
@@ -111,96 +127,12 @@ function App({ socket }) {
     socket.emit("typing");
   }
 
+  /* --- BACKGROUND CHANGE --- */
   function changeBackground() {
     setBackground(!background);
   }
 
-  const uploadImage = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const base64 = await convertBase64(file);
-      const resized_base64 = await process_image(base64);
-      setBaseImage(resized_base64);
-    }
-  };
-
-  const convertBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(file);
-
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
-    });
-  };
-
-  async function reduce_image_file_size(
-    base64Str,
-    MAX_WIDTH = 450,
-    MAX_HEIGHT = 450
-  ) {
-    let resized_base64 = await new Promise((resolve) => {
-      let img = new Image();
-      img.src = base64Str;
-      img.onload = () => {
-        let canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        let ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL()); // this will return base64 image results after resize
-      };
-    });
-    return resized_base64;
-  }
-
-  async function process_image(res, min_image_size = 500) {
-    if (res) {
-      const old_size = calc_image_size(res);
-      if (old_size > min_image_size) {
-        const resized = await reduce_image_file_size(res);
-        const new_size = calc_image_size(resized);
-        console.log("new_size=> ", new_size, "KB");
-        console.log("old_size=> ", old_size, "KB");
-        return resized;
-      } else {
-        console.log("image already small enough");
-        return res;
-      }
-    } else {
-      console.log("return err");
-      return null;
-    }
-  }
-
-  function calc_image_size(image) {
-    let y = 1;
-    if (image.endsWith("==")) {
-      y = 2;
-    }
-    const x_size = image.length * (3 / 4) - y;
-    return Math.round(x_size / 1024);
-  }
-
+  /* --- IMAGE MODAL --- */
   function showImage(base64string) {
     setOpenImage(true);
     setImage(base64string);
@@ -211,13 +143,11 @@ function App({ socket }) {
     window.scrollTo(0, document.body.scrollHeight);
   }
 
-  function turnLoaderOFF(message) {
-    setUsername((oldUsername) => {
-      if (message.username === oldUsername) {
-        setLoading(false);
-      }
-      return oldUsername;
-    });
+  /* --- IMAGE UPLOAD --- */
+  async function uploadImage(e) {
+    const file = e.target.files[0];
+    const resized_base64 = await compressImage(file);
+    setBaseImage(resized_base64);
   }
 
   if (!loggedin) {
@@ -242,20 +172,12 @@ function App({ socket }) {
             />
             {permanentRooms.map((room, index) => {
               return (
-                <div className="rooms" key={index}>
-                  <span>{room}</span>
-                  <button
-                    type="button"
-                    onMouseOver={() => {
-                      setRoom(room);
-                    }}
-                    onClick={(e) => {
-                      newUserLogin(e);
-                    }}
-                  >
-                    join
-                  </button>
-                </div>
+                <LoginRoom
+                  key={index}
+                  room={room}
+                  setRoom={setRoom}
+                  newUserLogin={newUserLogin}
+                />
               );
             })}
             <h3>---OR---</h3>
@@ -279,155 +201,33 @@ function App({ socket }) {
   }
 
   if (openImage) {
-    return (
-      <main className="image-modal">
-        <button onClick={closeImage}>
-          <AiOutlineClose style={{ transform: "translate(0px, 5px)" }} />
-        </button>
-        <img src={image} alt="user-media" width="100%" />
-      </main>
-    );
+    return <ImageView image={image} closeImage={closeImage} />;
   }
 
   return (
     <main>
-      <nav role="navigation">
-        <div id="menuToggle">
-          <input type="checkbox" />
-
-          <span
-            style={{ background: `${!background ? "#232323" : "#2a93ec"}` }}
-          ></span>
-          <span
-            style={{ background: `${!background ? "#232323" : "#2a93ec"}` }}
-          ></span>
-          <span
-            style={{ background: `${!background ? "#232323" : "#2a93ec"}` }}
-          ></span>
-
-          <ul id="menu">
-            <li>
-              Theme:{" "}
-              <div class="container">
-                <label class="switch">
-                  <input
-                    type="checkbox"
-                    defaultChecked={background}
-                    onChange={changeBackground}
-                  />{" "}
-                  <div></div>
-                </label>
-              </div>
-            </li>
-            <li>
-              Room{" "}
-              <BsFillHouseFill style={{ transform: "translate(3px, 3px)" }} />
-            </li>
-            <li className="room-name" style={{ fontWeight: "normal" }}>
-              <p style={{ margin: "0", padding: "0.5rem 1rem" }}>
-                {room} : {users.length}{" "}
-                <BsFillPersonFill
-                  style={{ transform: "translate(0px, 3px)" }}
-                />
-              </p>
-            </li>
-            <li className="leave-button" style={{ fontWeight: "normal" }}>
-              <p
-                style={{ margin: "0", padding: "0.5rem 1rem" }}
-                onClick={userLogout}
-              >
-                Leave room
-              </p>
-            </li>
-            <li>
-              Online users{" "}
-              <IoPeopleSharp style={{ transform: "translate(3px, 3px)" }} />
-            </li>
-            {users.map((user, index) => {
-              return (
-                <li
-                  className="user-names"
-                  key={index}
-                  style={{ fontWeight: "normal" }}
-                >
-                  <p>
-                    {user.name}
-                    {user.name === username && " (you)"}
-                  </p>
-                  <GoPrimitiveDot className="online-icon" />
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </nav>
+      <Hamburger
+        background={background}
+        changeBackground={changeBackground}
+        room={room}
+        users={users}
+        username={username}
+        userLogout={userLogout}
+      />
       <section className="form-section">
         <div id="messages">
           <ul>
             {messages.map((message, index) => {
               return (
-                <li
-                  key={index}
-                  className={`${message.username === username && "user-msg"}`}
-                >
-                  <div
-                    className={` message ${
-                      message.username === username && "user-msg-border"
-                    }`}
-                  >
-                    <h4
-                      className={`person-name ${
-                        message.username === username && "text-to-end"
-                      }`}
-                    >
-                      {message.username !== username && message.username}
-                    </h4>
-                    <p className="chat-message">{message.text}</p>
-                    {message.image && (
-                      <div
-                        style={{
-                          width: "10rem",
-                          height: "10rem",
-                          background: `url(${message.image}) no-repeat`,
-                          backgroundSize: "cover",
-                        }}
-                        onClick={() => {
-                          showImage(message.image);
-                        }}
-                      >
-                        {/* <img src={message.image} /> */}
-                      </div>
-                    )}
-                    <p className="chat-time">{message.time}</p>
-                  </div>
-                </li>
+                <UsersMessage
+                  message={message}
+                  username={username}
+                  showImage={showImage}
+                />
               );
             })}
-            {typing && (
-              <li>
-                <div className="message">
-                  <p
-                    className="chat-message"
-                    style={{ color: "rgb(0,150,136)", fontWeight: "bold" }}
-                  >
-                    {typingText}
-                  </p>
-                </div>
-              </li>
-            )}
-            {loading && (
-              <li className="user-msg">
-                <div className="message user-msg-border">
-                  <p className="chat-message">
-                    <img
-                      src={Spinner}
-                      alt="spinner"
-                      style={{ width: "5rem" }}
-                    />
-                  </p>
-                </div>
-              </li>
-            )}
+            {typing && <TypingMessage typingText={typingText} />}
+            {loading && <LoadingSpinner />}
           </ul>
         </div>
         <div>
@@ -453,9 +253,6 @@ function App({ socket }) {
               autoFocus
               value={messageText}
               autoComplete="off"
-              // onKeyPress={() => {
-              //   sendTypingEvent();
-              // }}
               onChange={(e) => {
                 setMessageText(e.target.value);
                 sendTypingEvent();
