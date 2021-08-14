@@ -22,10 +22,10 @@ export default function users_messages({ message, username, showImage }) {
               width: "10rem",
               height: "10rem",
               margin: "auto",
-              marginTop: "0.5rem"
+              marginTop: "0.5rem",
               background: `url(${message.image}) no-repeat`,
               backgroundSize: "cover",
-              borderRadius: "0.75rem"
+              borderRadius: "0.75rem",
             }}
             onClick={() => {
               showImage(message.image);
