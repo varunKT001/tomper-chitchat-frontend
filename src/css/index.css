@@ -55,6 +55,8 @@ body {
 .user-names > p {
   padding: 0.5rem;
   margin: 0;
+  overflow: auto;
+  overflow-wrap: break-word;
 }
 
 #form {
