@@ -21,8 +21,11 @@ export default function users_messages({ message, username, showImage }) {
             style={{
               width: "10rem",
               height: "10rem",
+              margin: "auto",
+              marginTop: "0.5rem"
               background: `url(${message.image}) no-repeat`,
               backgroundSize: "cover",
+              borderRadius: "0.75rem"
             }}
             onClick={() => {
               showImage(message.image);
