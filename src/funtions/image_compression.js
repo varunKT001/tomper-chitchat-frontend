@@ -30,7 +30,7 @@ async function reduce_image_file_size(
     let img = new Image();
     img.src = base64Str;
     img.onload = () => {
-      let canvas = document.createElement("canvas");
+      let canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
 
@@ -47,9 +47,9 @@ async function reduce_image_file_size(
       }
       canvas.width = width;
       canvas.height = height;
-      let ctx = canvas.getContext("2d");
+      let ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL()); // this will return base64 image results after resize
+      resolve(canvas.toDataURL());
     };
   });
   return resized_base64;
@@ -61,22 +61,18 @@ async function process_image(res, min_image_size = 500) {
     if (old_size > min_image_size) {
       const resized = await reduce_image_file_size(res);
       const new_size = calc_image_size(resized);
-      console.log("new_size=> ", new_size, "KB");
-      console.log("old_size=> ", old_size, "KB");
       return resized;
     } else {
-      console.log("image already small enough");
       return res;
     }
   } else {
-    console.log("return err");
     return null;
   }
 }
 
 function calc_image_size(image) {
   let y = 1;
-  if (image.endsWith("==")) {
+  if (image.endsWith('==')) {
     y = 2;
   }
   const x_size = image.length * (3 / 4) - y;
