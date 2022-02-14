@@ -5,7 +5,7 @@
 <b>A room based chatting application</b>
 </p>
 <p align='center'>
-<a href='https://tomper-chitchat.netlify.app/' target='_blank'>tomperchat.netlify.app</a>
+<a href='https://tomper-chitchat.netlify.app/' target='_blank'>tomper-chitchat.netlify.app</a>
 </p>
 
 ---
